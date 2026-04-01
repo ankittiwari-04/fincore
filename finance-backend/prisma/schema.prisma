@@ -1,0 +1,37 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note: Prisma SQLite connector does not natively support enums.
+// They are implemented as String fields with defaults and managed via app-level logic.
+
+model User {
+  id        String            @id @default(cuid())
+  email     String            @unique
+  password  String
+  name      String
+  role      String            @default("VIEWER") // Emulates Role enum: ADMIN, ANALYST, VIEWER
+  status    String            @default("ACTIVE") // Emulates Status enum: ACTIVE, INACTIVE
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  records   FinancialRecord[]
+}
+
+model FinancialRecord {
+  id        String    @id @default(cuid())
+  amount    Float
+  type      String    // Emulates RecordType enum: INCOME, EXPENSE
+  category  String
+  date      DateTime
+  notes     String?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+}
