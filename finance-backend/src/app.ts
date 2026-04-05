@@ -1,15 +1,26 @@
+import 'express-async-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { config } from './config/env';
 import { AppError } from './utils/AppError';
-
+import authRoutes from './routes/auth.route';
+import userRoutes from './routes/user.route';
+import recordRoutes from './routes/record.route';
+import dashboardRoutes from './routes/dashboard.route';
+import { ZodError } from 'zod';
+import { Prisma } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// routes will be mounted here in Day 2+
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/records', recordRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
@@ -39,6 +50,41 @@ app.use((err: Error | AppError, req: Request, res: Response, next: NextFunction)
       });
       return;
     }
+  } else if (err instanceof ZodError) {
+    statusCode = 400;
+    errStatus = 'fail';
+    res.status(statusCode).json({
+      status: errStatus,
+      message: 'Validation Error',
+      errors: err.errors,
+    });
+    return;
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2002') {
+      statusCode = 409;
+      errStatus = 'fail';
+      res.status(statusCode).json({
+        status: errStatus,
+        message: 'Resource already exists',
+      });
+      return;
+    } else if (err.code === 'P2025') {
+      statusCode = 404;
+      errStatus = 'fail';
+      res.status(statusCode).json({
+        status: errStatus,
+        message: 'Record not found',
+      });
+      return;
+    }
+  } else if (err instanceof jwt.JsonWebTokenError || err instanceof jwt.TokenExpiredError) {
+    statusCode = 401;
+    errStatus = 'fail';
+    res.status(statusCode).json({
+      status: errStatus,
+      message: 'Invalid or expired token',
+    });
+    return;
   }
 
   // Programming or other unknown error
@@ -57,6 +103,5 @@ app.use((err: Error | AppError, req: Request, res: Response, next: NextFunction)
   }
 });
 
-app.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
-});
+export default app;
+
