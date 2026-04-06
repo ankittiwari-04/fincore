@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+/**
+ * Production default points at the deployed API. Override anytime with VITE_API_URL on Vercel / local .env.
+ */
+function resolveBaseURL(): string {
+  const fromEnv = import.meta.env.VITE_API_URL?.trim();
+  if (fromEnv) return fromEnv;
+  if (import.meta.env.DEV) return 'http://localhost:3001/api';
+  return 'https://fincore-n72l.onrender.com/api';
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: resolveBaseURL(),
 });
 
 api.interceptors.request.use((config) => {
