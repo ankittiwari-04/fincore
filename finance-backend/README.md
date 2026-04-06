@@ -30,6 +30,8 @@ JWT_SECRET="your_super_secret_jwt_key_here"
 JWT_EXPIRES_IN="7d"
 PORT=3000
 NODE_ENV="development"
+# Production only — comma-separated frontend URLs for CORS (e.g. https://fincore.vercel.app)
+# FRONTEND_URL="https://your-frontend.example.com"
 ```
 
 ### 2. Backend Setup
@@ -136,3 +138,55 @@ FinCore/
 | PATCH | `/api/users/:id/role` | Yes | ADMIN | Elevate or restrict user privileges |
 | PATCH | `/api/users/:id/status` | Yes | ADMIN | Hard toggle Active state |
 | DELETE | `/api/users/:id` | Yes | ADMIN | Hard delete user |
+
+## Deploying live (overview)
+
+You need three pieces: **PostgreSQL** (e.g. [Neon](https://neon.tech)), a **Node host** for the API, and **static hosting** for the Vite frontend.
+
+### A. Database (Neon or any Postgres)
+
+1. Create a project and copy the connection string (include `?sslmode=require` if required).
+2. Set `DATABASE_URL` on your API host.
+
+### B. Backend API (example: [Render](https://render.com))
+
+1. New **Web Service** → connect this repo, root directory **`finance-backend`**.
+2. **Build command:** `npm install && npx prisma migrate deploy && npm run build`
+3. **Start command:** `npm start`
+4. **Environment variables:**
+
+| Variable | Example |
+|----------|---------|
+| `DATABASE_URL` | Postgres URL from Neon |
+| `JWT_SECRET` | Long random string (generate locally, never commit) |
+| `NODE_ENV` | `production` |
+| `FRONTEND_URL` | Your live frontend origin(s), comma-separated, e.g. `https://fincore.vercel.app` |
+| `PORT` | Usually set automatically by the platform |
+
+5. After deploy, open `https://<your-service>.onrender.com/health` — you should see `{"status":"ok",...}`.
+
+`postinstall` runs `prisma generate` so the Prisma client is built on install. `prisma` is a runtime dependency for that reason.
+
+### C. Frontend (example: [Vercel](https://vercel.com) or [Netlify](https://netlify.com))
+
+1. New project → import repo, root directory **`frontend`**.
+2. Build: `npm run build`, output directory **`dist`** (Vite default).
+3. **Environment variable:** `VITE_API_URL` = your public API base URL **including** `/api`, e.g. `https://fincore-api.onrender.com/api`
+
+Redeploy the frontend whenever the API URL changes.
+
+### D. Seed production (optional)
+
+From your machine (with `DATABASE_URL` pointing at production), once:
+
+```bash
+cd finance-backend
+npx prisma migrate deploy
+npm run db:seed
+```
+
+Or run a one-off shell on the host with the same env. **Change default seed passwords** if the DB is public.
+
+---
+
+Same pattern works on **Railway**, **Fly.io**, **Azure**, etc.: run the backend as a Node process with `npm start`, run migrations before or as part of the build, and point `VITE_API_URL` at that API.

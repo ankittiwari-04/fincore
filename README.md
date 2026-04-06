@@ -14,6 +14,8 @@ Full-stack **finance dashboard** demo: REST API with role-based access (Viewer /
 1. **Backend:** follow [`finance-backend/README.md`](./finance-backend/README.md) (database URL, `npm install`, Prisma migrate, seed, `npm run dev`).
 2. **Frontend:** `cd frontend && npm install && npm run dev` — set `VITE_API_URL` if your API is not the default in `src/api/axios.ts`.
 
+**Going live:** see [Deploying live](finance-backend/README.md#deploying-live-overview) in `finance-backend/README.md` (Neon + Render + Vercel-style setup, env vars, migrations).
+
 ## Tech highlights
 
 - **Persistence:** PostgreSQL via Prisma (not in-memory).

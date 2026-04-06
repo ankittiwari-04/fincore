@@ -12,8 +12,20 @@ import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 const app = express();
 
-// Middleware
-app.use(cors());
+if (config.nodeEnv === 'production') {
+  app.set('trust proxy', 1);
+}
+
+// Middleware — restrict CORS in production when FRONTEND_URL is set
+if (config.frontendOrigins.length > 0) {
+  app.use(
+    cors({
+      origin: config.frontendOrigins,
+    })
+  );
+} else {
+  app.use(cors());
+}
 app.use(express.json());
 
 // Mount routes
