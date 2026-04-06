@@ -34,6 +34,8 @@ NODE_ENV="development"
 # FRONTEND_URL="https://your-frontend.example.com"
 ```
 
+**Prisma `P1012` (URL must start with `postgresql://` or `postgres://`):** Your `DATABASE_URL` is empty, wrong, or not Postgres. Use the full string from Neon (or your host), with no extra quotes inside the value on Render. It must begin with `postgresql://` or `postgres://`, not `mysql://`, `mongodb://`, or `file:`.
+
 ### 2. Backend Setup
 1. Open a terminal and navigate to the backend directory:
    ```bash

@@ -30,3 +30,10 @@ if (!config.jwtSecret) {
 if (!config.databaseUrl) {
   throw new Error('Missing required environment variable: DATABASE_URL');
 }
+
+const dbUrl = config.databaseUrl.trim();
+if (!/^postgres(ql)?:\/\//i.test(dbUrl)) {
+  throw new Error(
+    'DATABASE_URL must start with postgresql:// or postgres:// (Prisma P1012). Fix your .env or Render environment — remove stray quotes and use your full Neon/host URL.'
+  );
+}
