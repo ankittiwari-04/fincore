@@ -18,8 +18,11 @@ export class AppError extends Error {
     this.isOperational = isOperational;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
 
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
+    const Err = Error as unknown as {
+      captureStackTrace?: (target: object, constructorOpt?: Function) => void;
+    };
+    if (typeof Err.captureStackTrace === 'function') {
+      Err.captureStackTrace(this, this.constructor);
     }
   }
 }

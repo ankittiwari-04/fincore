@@ -6,7 +6,7 @@ dotenv.config();
 
 const frontendOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',')
-      .map((s) => s.trim())
+      .map((s: string) => s.trim())
       .filter(Boolean)
   : [];
 
