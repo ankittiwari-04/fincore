@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ roles }) => {
   }
 
   if (roles && roles.length > 0 && !hasRole(roles)) {
-    return <Navigate to="/" replace />; // Or to a generic unauthorized page
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

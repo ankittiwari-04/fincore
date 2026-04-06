@@ -31,7 +31,7 @@ const Register: React.FC = () => {
         }
         login(token, user);
         toast.success(`Welcome to FinCore, ${user.name}!`);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Registration failed.';
