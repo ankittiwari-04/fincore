@@ -47,7 +47,7 @@ export async function loginUser(data: LoginInput) {
   });
 
   if (!user) {
-    throw new AppError('Invalid email or password', 401);
+    throw new AppError('Incorrect email or password. Please enter the correct password and try again.', 401);
   }
 
   if (user.status === 'INACTIVE') {
@@ -56,7 +56,7 @@ export async function loginUser(data: LoginInput) {
 
   const isPasswordValid = await bcrypt.compare(data.password, user.password);
   if (!isPasswordValid) {
-    throw new AppError('Invalid email or password', 401);
+    throw new AppError('Incorrect email or password. Please enter the correct password and try again.', 401);
   }
 
   const payload = {

@@ -9,11 +9,15 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+    setPasswordError('');
     setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
@@ -24,7 +28,14 @@ const Login: React.FC = () => {
         navigate('/');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Login failed.');
+      const message = err.response?.data?.message || 'Login failed.';
+      const lower = String(message).toLowerCase();
+      if (lower.includes('password')) {
+        setPasswordError(message);
+      } else {
+        setFormError(message);
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -60,7 +71,10 @@ const Login: React.FC = () => {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFormError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-dark text-white rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
                 />
               </div>
@@ -78,11 +92,22 @@ const Login: React.FC = () => {
                   autoComplete="current-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError('');
+                    setFormError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-dark text-white rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
                 />
               </div>
+              {passwordError && (
+                <p className="mt-2 text-xs text-red-400">{passwordError}</p>
+              )}
             </div>
+
+            {formError && (
+              <p className="text-sm text-red-400">{formError}</p>
+            )}
 
             <div>
               <button

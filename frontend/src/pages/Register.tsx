@@ -10,22 +10,49 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+    setPasswordError('');
     setLoading(true);
     try {
       const response = await api.post('/auth/register', { name, email, password });
       if (response.data.status === 'success') {
-        const { token, user } = response.data.data;
+        const { user } = response.data.data;
+        const loginResponse = await api.post('/auth/login', { email, password });
+        const token = loginResponse?.data?.data?.token;
+        if (!token) {
+          throw new Error('Registration succeeded, but auto-login failed. Please sign in manually.');
+        }
         login(token, user);
         toast.success(`Welcome to FinCore, ${user.name}!`);
         navigate('/');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Registration failed.');
+      const message = err.response?.data?.message || err.message || 'Registration failed.';
+      const fieldErrors = err.response?.data?.errors;
+      let hasPasswordIssue = false;
+      if (Array.isArray(fieldErrors)) {
+        const passwordIssue = fieldErrors.find((issue: any) => issue?.path?.[0] === 'password');
+        if (passwordIssue?.message) {
+          setPasswordError(passwordIssue.message);
+          hasPasswordIssue = true;
+        }
+      }
+      if (!hasPasswordIssue) {
+        const lower = String(message).toLowerCase();
+        if (lower.includes('password')) {
+          setPasswordError(message);
+        } else {
+          setFormError(message);
+        }
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -61,7 +88,10 @@ const Register: React.FC = () => {
                   autoComplete="name"
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setFormError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-dark text-white rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
                 />
               </div>
@@ -79,7 +109,10 @@ const Register: React.FC = () => {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFormError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-dark text-white rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
                 />
               </div>
@@ -97,12 +130,23 @@ const Register: React.FC = () => {
                   autoComplete="new-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError('');
+                    setFormError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-dark text-white rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors"
                 />
               </div>
-              <p className="mt-2 text-xs text-gray-500">Must be at least 8 characters, with 1 uppercase, 1 number, and 1 special character.</p>
+              <p className="mt-2 text-xs text-gray-500">Must be at least 8 characters, with uppercase, lowercase, number, and special character.</p>
+              {passwordError && (
+                <p className="mt-2 text-xs text-red-400">{passwordError}</p>
+              )}
             </div>
+
+            {formError && (
+              <p className="text-sm text-red-400">{formError}</p>
+            )}
 
             <div>
               <button
