@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { DollarSign, ShieldCheck, BarChart3, Users } from 'lucide-react';
+import { DollarSign, ShieldCheck, BarChart3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
@@ -64,18 +64,6 @@ const Home: React.FC = () => {
               <ShieldCheck className="w-6 h-6 text-primary" />
               <h3 className="mt-3 font-semibold">Secure Access</h3>
               <p className="mt-2 text-sm text-gray-400">Role-based permissions for viewer, analyst, and admin.</p>
-            </div>
-            <div className="p-5 rounded-lg border border-gray-800 bg-card sm:col-span-2">
-              <Users className="w-6 h-6 text-primary" />
-              <h3 className="mt-3 font-semibold">How Admin Login Works</h3>
-              <p className="mt-2 text-sm text-gray-400">
-                New registrations are created as <span className="text-gray-200">VIEWER</span>. An existing admin must
-                promote users to <span className="text-gray-200">ADMIN</span> from the Users module.
-              </p>
-              <p className="mt-2 text-sm text-gray-400">
-                If seed data is loaded, you can login as admin with:
-                <span className="text-gray-200"> admin@finance.com / Admin@123</span>.
-              </p>
             </div>
           </div>
         </section>
