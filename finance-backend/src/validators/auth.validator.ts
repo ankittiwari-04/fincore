@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// We define Role enum here since Prisma SQLite doesn't natively export this from schema
+// Keep a local Role enum for auth typing across middleware/services.
 export enum Role {
   ADMIN = 'ADMIN',
   ANALYST = 'ANALYST',
