@@ -18,9 +18,8 @@ export class AppError extends Error {
     this.isOperational = isOperational;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
 
-    const Err = Error as unknown as {
-      captureStackTrace?: (target: object, constructorOpt?: Function) => void;
-    };
+    // V8 helper; not on lib ES typings — avoid TS2339 on ErrorConstructor (e.g. Render CI).
+    const Err = Error as unknown as { captureStackTrace?: (t: object, ctor?: unknown) => void };
     if (typeof Err.captureStackTrace === 'function') {
       Err.captureStackTrace(this, this.constructor);
     }

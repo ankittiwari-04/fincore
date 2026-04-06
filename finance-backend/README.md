@@ -167,6 +167,8 @@ You need three pieces: **PostgreSQL** (e.g. [Neon](https://neon.tech)), a **Node
 
 `postinstall` runs `prisma generate` so the Prisma client is built on install. `prisma` is a runtime dependency for that reason.
 
+**Render build / TypeScript:** `npm run build` runs a pinned `npm install` of `@types/node`, `@types/express`, `@types/cors`, `@types/jsonwebtoken`, and `@types/bcryptjs` before `tsc`, so typings exist even if the first install step skipped them. **Commit `package-lock.json`.** If builds still fail, add Render env var `NPM_CONFIG_PRODUCTION`=`false` (or keep the repo’s `.npmrc` with `production=false`).
+
 ### C. Frontend (example: [Vercel](https://vercel.com) or [Netlify](https://netlify.com))
 
 1. New project → import repo, root directory **`frontend`**.
