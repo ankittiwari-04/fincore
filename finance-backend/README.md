@@ -72,6 +72,33 @@ NODE_ENV="development"
    npm run dev
    ```
 
+## Admin Login (For Evaluator)
+
+- New users are created as `VIEWER` by default.
+- Only an existing `ADMIN` can promote users to `ANALYST` or `ADMIN`.
+
+### Default admin credentials (after seed)
+
+- **Email:** `admin@finance.com`
+- **Password:** `Admin@123`
+
+### If admin login does not work on live deployment
+
+The deployed database is likely not seeded yet. Run:
+
+```bash
+cd finance-backend
+npx prisma migrate deploy
+npm run db:seed
+```
+
+### Role assignment flow
+
+1. Login as admin.
+2. Open the Users page.
+3. Change role from dropdown to `ANALYST` or `ADMIN`.
+4. User logs out and logs in again to apply updated permissions.
+
 ## Assumptions Made
 - Soft deletion is used for records, meaning deleted items will retain their referential integrity while setting `deletedAt` flag instead of a hard drop. (Users are still hard deleted since they own records).
 - The `Role` scale strictly controls component access horizontally (routing layers) and vertically (API gateways).

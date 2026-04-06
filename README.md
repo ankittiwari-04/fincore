@@ -23,6 +23,33 @@ Full-stack **finance dashboard** demo: REST API with role-based access (Viewer /
 - **Records:** Soft delete, filtering, pagination, optional search.
 - **Dashboard:** Summary totals, category breakdown, monthly/weekly trends, recent activity.
 
+## Admin Login (For Evaluator)
+
+- New users are created as `VIEWER` by default.
+- Only an existing `ADMIN` can change a user's role to `ANALYST` or `ADMIN`.
+
+### Default admin credentials (after seed)
+
+- **Email:** `admin@finance.com`
+- **Password:** `Admin@123`
+
+### If admin login does not work on live deployment
+
+The deployed database is likely not seeded yet. Run:
+
+```bash
+cd finance-backend
+npx prisma migrate deploy
+npm run db:seed
+```
+
+### Role assignment flow
+
+1. Login as admin.
+2. Open the Users page.
+3. Change role from dropdown to `ANALYST` or `ADMIN`.
+4. User logs out and logs in again to see updated permissions.
+
 ---
 
 _Submission / evaluation:_ backend scope and assumptions are documented in [`finance-backend/README.md`](./finance-backend/README.md).
