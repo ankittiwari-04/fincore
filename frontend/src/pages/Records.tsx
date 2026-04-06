@@ -9,6 +9,7 @@ const Records: React.FC = () => {
   const { user } = useAuth();
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [accessError, setAccessError] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -29,7 +30,9 @@ const Records: React.FC = () => {
   });
 
   const fetchRecords = async () => {
+    if (!user) return;
     setLoading(true);
+    setAccessError('');
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -43,8 +46,17 @@ const Records: React.FC = () => {
       setRecords(data.records);
       setTotal(data.total);
       setTotalPages(data.totalPages);
-    } catch (error) {
-      toast.error('Failed to load records');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        const role = user.role?.toUpperCase?.() || 'USER';
+        const message = `Access denied: your role (${role}) cannot view records. Please ask an admin for ANALYST or ADMIN access.`;
+        setAccessError(message);
+        setRecords([]);
+        setTotal(0);
+        setTotalPages(1);
+        return;
+      }
+      toast.error(error.response?.data?.message || 'Failed to load records');
     } finally {
       setLoading(false);
     }
@@ -91,7 +103,7 @@ const Records: React.FC = () => {
     }
   };
 
-  const canEdit = user?.role === 'ADMIN' || user?.role === 'ANALYST';
+  const canCreate = user?.role === 'ADMIN';
 
   return (
     <div className="space-y-6">
@@ -106,7 +118,7 @@ const Records: React.FC = () => {
             Filter
           </button>
           
-          {canEdit && (
+          {canCreate && (
             <button 
               onClick={() => setShowModal(true)}
               className="flex items-center px-4 py-2 bg-primary rounded-md text-sm font-medium text-white hover:bg-indigo-600"
@@ -148,11 +160,17 @@ const Records: React.FC = () => {
         </form>
       )}
 
+      {accessError && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {accessError}
+        </div>
+      )}
+
       {loading && !records.length ? (
         <div className="text-center py-10 text-gray-400">Loading records...</div>
       ) : (
         <>
-          <RecordTable records={records} onDelete={handleDelete} userRole={user!.role} />
+          <RecordTable records={records} onDelete={handleDelete} userRole={user?.role ?? 'VIEWER'} />
           
           <div className="flex justify-between items-center bg-card px-4 py-3 border border-gray-800 rounded-lg">
             <div className="text-sm text-gray-400">
